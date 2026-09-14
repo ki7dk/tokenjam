@@ -56,6 +56,21 @@ path = "~/.tj/alerts.log"
 type = "stdout"
 ```
 
+### ntfy priorities
+
+Every alert sent to an ntfy topic carries a `Priority` header derived from its
+severity, so a critical alert vibrates and pops over while an info alert lands
+silently in the notification drawer:
+
+| Severity | ntfy priority |
+|---|---|
+| `info` | `low` |
+| `warning` | `default` |
+| `critical` | `high` |
+
+ntfy's `max` priority is an emergency escalation that overrides the phone's own
+notification sound, so no severity maps to it.
+
 ## Sensitive actions
 
 Define which tool calls should trigger immediate alerts:

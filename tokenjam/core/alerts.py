@@ -871,7 +871,10 @@ class NtfyChannel(AlertChannel):
         if _severity_rank(alert.severity) < _severity_rank(self.min_severity):
             return
         url = f"{self.server.rstrip('/')}/{self.topic}"
-        headers: dict[str, str] = {"Title": alert.title}
+        headers: dict[str, str] = {
+            "Title": alert.title,
+            "Priority": _NTFY_SEVERITY_PRIORITY.get(alert.severity, "default"),
+        }
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         body = _format_detail_text(alert, strip=not self._include_captured_content)
@@ -973,6 +976,17 @@ _SEVERITY_RANK = {Severity.INFO: 0, Severity.WARNING: 1, Severity.CRITICAL: 2}
 
 def _severity_rank(sev: Severity) -> int:
     return _SEVERITY_RANK.get(sev, 0)
+
+
+# ntfy's five priorities are min, low, default, high and max. A phone treats
+# max as an emergency — insistent vibration bursts that override the device's
+# own notification sound — so no severity derives it; an alert about a token
+# budget is not that, whatever its severity.
+_NTFY_SEVERITY_PRIORITY = {
+    Severity.INFO:     "low",
+    Severity.WARNING:  "default",
+    Severity.CRITICAL: "high",
+}
 
 
 def _escape_markdown(text: str) -> str:
